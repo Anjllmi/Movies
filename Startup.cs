@@ -1,12 +1,15 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Movies.Data;
 using Movies.Models;
@@ -14,6 +17,7 @@ using Movies.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Movies
@@ -44,7 +48,11 @@ namespace Movies
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DBContext"))
                 .UseSnakeCaseNamingConvention()
-                ); 
+                );
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -58,7 +66,28 @@ namespace Movies
             //crea varias instancias, es necesario porque ApplicationDbContext es de tipo Scoped
             services.AddScoped<IGenericCRUD<Movie>,  GenericCRUD<Movie>>();
             services.AddScoped<IGenericCRUD<Category>, GenericCRUD<Category>>();
-            
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.Audience = Configuration["TokenValidationParameters:Audience"];
+                    //options.Authority = "https://localhost:5001/";
+
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = Configuration["TokenValidationParameters:Issuer"],
+                        //Verifica que la firma del token sea la misma
+                        IssuerSigningKey =new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["TokenValidationParameters:IssuerSingingKey"])),
+                        ValidateIssuerSigningKey=true,
+                        ValidateAudience=true,
+                        ValidateLifetime=true,
+                    };
+                }
+                );
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -75,7 +104,10 @@ namespace Movies
 
             app.UseRouting();
 
+            app.UseAuthentication();
+
             app.UseAuthorization();
+            
 
             app.UseEndpoints(endpoints =>
             {

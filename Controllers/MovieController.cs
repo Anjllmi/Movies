@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,6 +19,7 @@ namespace Movies.Controllers
     //controller es reemplazado por el nombre de la clase MovieController pero solo «Movie».
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
     public class MovieController : ControllerBase
     {
@@ -41,15 +44,15 @@ namespace Movies.Controllers
             _service = service;
         }
 
-        // GET: MovieController
-
 
         //GET: api/movie/
         [HttpGet]
+        //[AllowAnonymous]
+        [Authorize(Roles = "ADMIN")]
         public IEnumerable<Movie> All(int? year)
         {
             //Información del año de la película
-            _logger.LogInformation($"year{year}");
+            _logger.LogInformation($"year{year} user{HttpContext.User}");
 
             //throw new Exception(); //"toteador"
 
@@ -62,20 +65,22 @@ namespace Movies.Controllers
                 .ToList();
         }
 
-        // PUT: api/Category/5
+        // PUT: api/Movie/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, Movie movie)
+        [Authorize(Roles = "ADMIN")]
+        public async Task<IActionResult> PutMovie(int id, Movie movie)
         {
             movie = await _service.Update(id, movie);
             if (movie == null) return NotFound();
             return Ok(movie);
         }
 
-        // POST: api/Category
+        // POST: api/Movie
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Movie>> PostCategory(Movie movie)
+        [Authorize(Roles = "ADMIN")]
+        public async Task<ActionResult<Movie>> PostMovie(Movie movie)
         {
             //_context.Categories.Add(category);
             //await _context.SaveChangesAsync(); 

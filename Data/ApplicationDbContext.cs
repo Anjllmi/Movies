@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Movies.Models;
 using System;
 using System.Collections.Generic;
@@ -7,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Movies.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
         //Base de datos de movies
         public DbSet<Movie> Movies { get; set; }
@@ -18,6 +20,7 @@ namespace Movies.Data
         //luego se actualiza la base de datos:
         //dotnet ef database update
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
 
         //Constructor
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)

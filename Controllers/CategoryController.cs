@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +15,7 @@ namespace Movies.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CategoryController : ControllerBase
     {
         private readonly IGenericCRUD<Category> _service;
@@ -24,6 +27,7 @@ namespace Movies.Controllers
 
         // GET: api/Category
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
         {
             //return await _context.Categories.ToListAsync();
@@ -32,6 +36,7 @@ namespace Movies.Controllers
 
         // GET: api/Category/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<Category>> GetCategory(int id)
         {
             //var category = await _context.Categories.FindAsync(id);
@@ -44,6 +49,7 @@ namespace Movies.Controllers
         // PUT: api/Category/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> PutCategory(int id, Category category)
         {
             category = await _service.Update(id,category);
@@ -54,6 +60,7 @@ namespace Movies.Controllers
         // POST: api/Category
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "ADMIN")]
         public async Task<ActionResult<Category>> PostCategory(Category category)
         {
             //_context.Categories.Add(category);
@@ -67,6 +74,7 @@ namespace Movies.Controllers
 
         // DELETE: api/Category/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
             var category = await _service.Delete(id);
