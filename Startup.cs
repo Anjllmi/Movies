@@ -12,13 +12,16 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Movies.Data;
+using Movies.Managers;
 using Movies.Models;
 using Movies.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace Movies
 {
@@ -46,12 +49,17 @@ namespace Movies
              * dotnet ef database update
              */
             services.AddDbContext<ApplicationDbContext>(options =>
+            {
                 options.UseNpgsql(Configuration.GetConnectionString("DBContext"))
-                .UseSnakeCaseNamingConvention()
-                );
+                 .UseSnakeCaseNamingConvention();
 
+                  // to replace the default OpenIddict entities.
+                options.UseOpenIddict();
+            });
+            //identity user for aplicattion user
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultUI()
                 .AddDefaultTokenProviders();
 
             services.AddControllers();
@@ -61,13 +69,70 @@ namespace Movies
             });
 
             //Clase única mientras se ejecute
-            services.AddSingleton<MovieSingleton>(); 
+            services.AddSingleton<MovieSingleton>();
+
+            services.AddScoped<UsuarioManager>();
 
             //crea varias instancias, es necesario porque ApplicationDbContext es de tipo Scoped
             services.AddScoped<IGenericCRUD<Movie>,  GenericCRUD<Movie>>();
             services.AddScoped<IGenericCRUD<Category>, GenericCRUD<Category>>();
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+
+            #region openidict core
+
+            // Configure Identity to use the same JWT claims as OpenIddict instead
+            // of the legacy WS-Federation claims it uses by default (ClaimTypes),
+            // which saves you from doing the mapping in your authorization controller.
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.ClaimsIdentity.UserNameClaimType = Claims.Name;
+                options.ClaimsIdentity.UserIdClaimType = Claims.Subject;
+                options.ClaimsIdentity.RoleClaimType = Claims.Role;
+            });
+
+            services.AddOpenIddict()
+
+            // Register the OpenIddict core components.
+            .AddCore(options =>
+            {
+                // Configure OpenIddict to use the Entity Framework Core stores and models.
+                // Note: call ReplaceDefaultEntities() to replace the default entities.
+                options.UseEntityFrameworkCore()
+                        .UseDbContext<ApplicationDbContext>();
+            })
+
+            // Register the OpenIddict server components.
+            .AddServer(options =>
+            {
+                // Enable the token endpoint.
+                options.SetTokenEndpointUris("/connect/token");
+
+                // Enable the client credentials flow.
+                options.
+                AllowPasswordFlow(). 
+                AllowClientCredentialsFlow();
+
+                // Register the signing and encryption credentials.
+                options.AddDevelopmentEncryptionCertificate()
+                        .AddDevelopmentSigningCertificate();
+
+                // Register the ASP.NET Core host and configure the ASP.NET Core options.
+                options.UseAspNetCore()
+                        .EnableTokenEndpointPassthrough();
+            })
+
+            // Register the OpenIddict validation components.
+            .AddValidation(options =>
+            {
+                // Import the configuration from the local OpenIddict server instance.
+                options.UseLocalServer();
+
+                // Register the ASP.NET Core host.
+                options.UseAspNetCore();
+            });
+            #endregion
+
+            services.AddAuthentication()
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
                 {
                     options.RequireHttpsMetadata = false;
@@ -83,9 +148,24 @@ namespace Movies
                         ValidateIssuerSigningKey=true,
                         ValidateAudience=true,
                         ValidateLifetime=true,
+                       
                     };
-                }
-                );
+
+                });
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = true;
+            });
+
+            services.AddRazorPages();
+
+            //Worker
+            services.AddHostedService<Worker>();
 
 
         }
@@ -102,6 +182,8 @@ namespace Movies
 
             app.UseHttpsRedirection();
 
+            app.UseStaticFiles();
+
             app.UseRouting();
 
             app.UseAuthentication();
@@ -109,9 +191,11 @@ namespace Movies
             app.UseAuthorization();
             
 
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRazorPages();
             });
         }
     }

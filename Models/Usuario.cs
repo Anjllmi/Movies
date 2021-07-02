@@ -19,14 +19,14 @@ namespace Movies.Models
         [Email]
         [StringLength(255)]
         [Required]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [StringLength(255)]
         [Required]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [StringLength(255)]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
         public UserRole Role { get; set; }
     }
@@ -35,25 +35,31 @@ namespace Movies.Models
         [Email]
         [StringLength(255)]
         [Required]
-        public string Email { get; set; }
+        public string? Email { get; set; }
+
+        
 
         [Required]
         [StringLength(255)]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         [NotMapped]
         [StringLength(255)]
         [Compare(nameof(Password),ErrorMessage ="La contraseña no coincide")]
-        public string ConfirmPassword { get; set; }
+        public string? ConfirmPassword { get; set; }
 
         [StringLength(255)]
         [Required]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [StringLength(255)]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
         public UserRole Role { get; set; }
+
+        [NotMapped]
+        [Phone]
+        public string? Phone { get; set; }
 
     }
 }

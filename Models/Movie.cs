@@ -26,7 +26,7 @@ namespace Movies.Models
         public int? CategoryForeignKey { get; set; }
 
         [ForeignKey("CategoryForeignKey")]
-        public Category Category { get; set; }
+        public Category? Category { get; set; }
 
     }
 }

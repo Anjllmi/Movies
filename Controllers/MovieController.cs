@@ -8,6 +8,7 @@ using Movies.Data;
 using Movies.Models;
 using Movies.Services;
 using Movies.Utilities;
+using OpenIddict.Validation.AspNetCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace Movies.Controllers
     //controller es reemplazado por el nombre de la clase MovieController pero solo «Movie».
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
 
     public class MovieController : ControllerBase
     {
@@ -47,8 +48,8 @@ namespace Movies.Controllers
 
         //GET: api/movie/
         [HttpGet]
-        //[AllowAnonymous]
-        [Authorize(Roles = "ADMIN")]
+        [AllowAnonymous]
+        //[Authorize(Roles = "ADMIN")]
         public IEnumerable<Movie> All(int? year)
         {
             //Información del año de la película
