@@ -27,37 +27,23 @@ namespace Movies
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public Startup(IConfiguration configuration){Configuration = configuration;}
 
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //Configuración para añadir DBContext usando PostgreSQL
-            //Trae la conexión desde ApplicationDBContext
-            //Pero actualmente esta hecha la conexión en appsettings.json
-            /*
-             * Instalar Install-Package EFCore.NamingConventions -Version 5.0.2
-             * e incluir .UseSnakeCaseNamingConvention()
-             * 
-             * Borrar tablas de la base de datos y carpeta migrations y volver a ejecutar:
-             * dotnet ef migrations add "Initial Migration"
-             * dotnet ef database update
-             */
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseNpgsql(Configuration.GetConnectionString("DBContext"))
-                 .UseSnakeCaseNamingConvention();
+                options.UseNpgsql(Configuration.GetConnectionString("DBContext")).UseSnakeCaseNamingConvention();
 
                   // to replace the default OpenIddict entities.
                 options.UseOpenIddict();
             });
+
             //identity user for aplicattion user
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI()
                 .AddDefaultTokenProviders();
@@ -68,9 +54,10 @@ namespace Movies
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Movies", Version = "v1" });
             });
 
-            //Clase única mientras se ejecute
-            services.AddSingleton<MovieSingleton>();
+            
+            services.AddSingleton<MovieSingleton>();        //@deprecated
 
+            //Scoped
             services.AddScoped<UsuarioManager>();
 
             //crea varias instancias, es necesario porque ApplicationDbContext es de tipo Scoped

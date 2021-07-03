@@ -12,15 +12,11 @@ namespace Movies.Data
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<Movie> Movies { get; set; }
-
         public DbSet<Category> Categories { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
 
-        //Constructor
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            :base(options)
-        {
-        }
+        
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) :base(options){}
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.EnableSensitiveDataLogging();

@@ -14,8 +14,8 @@ namespace Movies.Managers
     public class UsuarioManager
     {
         public readonly ApplicationDbContext _context;
-        public readonly UserManager<IdentityUser> _userManager;
-        public readonly SignInManager<IdentityUser> _signInManager;
+        public readonly UserManager<ApplicationUser> _userManager;
+        public readonly SignInManager<ApplicationUser> _signInManager;
 
         /// <summary>
         /// Constructor
@@ -26,8 +26,8 @@ namespace Movies.Managers
         public UsuarioManager
         (
             ApplicationDbContext context,
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager
         )
         {
             _context = context;
@@ -43,13 +43,13 @@ namespace Movies.Managers
         /// <returns></returns>
         public async Task<IdentityResult> Register(Usuario model)
         {
-            return await _userManager.CreateAsync(new IdentityUser
+            return await _userManager.CreateAsync(new ApplicationUser
             {
                 Email = model.Email,
                 UserName= model.Email,
                 PhoneNumber= model.Phone,
-                //Name = model.Name,
-                //LastName = model.LastName,
+                Name = model.Name,
+                LastName = model.LastName,
             },
                 model.Password);  
         }
