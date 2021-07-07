@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Movies.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser> //HERE
     {
         public DbSet<Movie> Movies { get; set; }
         public DbSet<Category> Categories { get; set; }

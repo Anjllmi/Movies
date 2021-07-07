@@ -23,13 +23,17 @@ namespace Movies.Controllers
 
     public class AuthorizationController : ControllerBase
     {
+        //private readonly IOpenIddictApplicationManager _applicationManager;
+        //private readonly UserManager<ApplicationUser> _userManager;
+        //private readonly SignInManager<ApplicationUser> _signInManager;
+
         private readonly IOpenIddictApplicationManager _applicationManager;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager; //HERE
+        private readonly SignInManager<ApplicationUser> _signInManager; //HERE 
 
         public AuthorizationController(IOpenIddictApplicationManager applicationManager,
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            UserManager<ApplicationUser> userManager, //HERE
+            SignInManager<ApplicationUser> signInManager) //HERE
         {
             _signInManager = signInManager;
             _userManager = userManager;

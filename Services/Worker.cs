@@ -43,6 +43,7 @@ namespace Movies.Services
                 }
                 });
             }
+            
         }
 
         public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

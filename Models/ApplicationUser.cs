@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Movies.Models
 {
-    public class ApplicationUser:IdentityUser
+    public class ApplicationUser : IdentityUser
     {
         [StringLength(100)]
-        public string Name { get; set; }
+        public string? FirstName { get; set; }
 
         [StringLength(100)]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
     }
 }

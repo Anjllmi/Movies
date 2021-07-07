@@ -14,8 +14,8 @@ namespace Movies.Managers
     public class UsuarioManager
     {
         public readonly ApplicationDbContext _context;
-        public readonly UserManager<ApplicationUser> _userManager;
-        public readonly SignInManager<ApplicationUser> _signInManager;
+        public readonly UserManager<ApplicationUser> _userManager;  //HERE
+        public readonly SignInManager<ApplicationUser> _signInManager;  //HERE
 
         /// <summary>
         /// Constructor
@@ -26,8 +26,8 @@ namespace Movies.Managers
         public UsuarioManager
         (
             ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager
+            UserManager<ApplicationUser> userManager, //HERE
+            SignInManager<ApplicationUser> signInManager    //HERE
         )
         {
             _context = context;
@@ -48,8 +48,8 @@ namespace Movies.Managers
                 Email = model.Email,
                 UserName= model.Email,
                 PhoneNumber= model.Phone,
-                Name = model.Name,
-                LastName = model.LastName,
+                //FirstName = model.Name,
+                //LastName = model.LastName,
             },
                 model.Password);  
         }

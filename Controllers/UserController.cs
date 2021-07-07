@@ -144,7 +144,7 @@ namespace Movies.Controllers
                 }
             
 
-            var accesToken = GenerateJWT(response as IdentityUser);
+            var accesToken = GenerateJWT(response as ApplicationUser);
 
             return Ok(new
             {
