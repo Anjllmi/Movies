@@ -48,8 +48,8 @@ namespace Movies.Managers
                 Email = model.Email,
                 UserName= model.Email,
                 PhoneNumber= model.Phone,
-                //FirstName = model.Name,
-                //LastName = model.LastName,
+                FirstName = model.Name,
+                LastName = model.LastName,
             },
                 model.Password);  
         }

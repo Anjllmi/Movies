@@ -77,8 +77,8 @@ namespace Movies.Controllers
         /// <returns></returns>
         [HttpPost("[action]")]
         //[HttpPost]
-        //[Authorize(Roles = "ADMIN")]
-        [AllowAnonymous]
+        [Authorize(Roles = "ADMIN")]
+        //[AllowAnonymous]
         public async Task<IActionResult> RegisterUser(Usuario model)
         {
             var response = await _usuarioManager.Register(model);
