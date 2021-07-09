@@ -1,3 +1,15 @@
+using GraphQL;
+using GraphQL.Server;
+using GraphQL.SystemTextJson;
+using GraphQL.Types;
+
+using Movies.GraphQLArchives;
+using Movies.GraphQLArchives.Models;
+
+
+
+
+using Microsoft.AspNetCore.Authentication.Cookies; 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,9 +39,14 @@ namespace Movies
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration){Configuration = configuration;}
+        public Startup(IConfiguration configuration, IWebHostEnvironment webEnvironment) 
+        {
+            Configuration = configuration;
+            WebEnvironment = webEnvironment;
+        }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment WebEnvironment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -54,7 +71,39 @@ namespace Movies
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Movies", Version = "v1" });
             });
 
-            
+
+            #region graphql
+            //services.AddSingleton<IDocumentExecuter, DocumentExecuter>();
+            //services.AddSingleton<IDocumentWriter, DocumentWriter>();
+
+            //services.AddScoped<CustomQuery>();
+            //// models
+            //services.AddSingleton<MovieType>();
+            //services.AddSingleton<CategoryType>();
+
+            //services.AddScoped<ISchema, CustomSchema>();
+
+            // Add GraphQL services and configure options
+            services
+                .AddScoped<CustomSchema>()
+                .AddGraphQL((options, provider) =>
+                {
+                    options.EnableMetrics = WebEnvironment.IsDevelopment();
+                    var logger = provider.GetRequiredService<ILogger<Startup>>();
+                    options.UnhandledExceptionDelegate = ctx => logger.LogError("{Error} occurred", ctx.OriginalException.Message);
+                })
+                // Add required services for GraphQL request/response de/serialization
+                .AddSystemTextJson() // For .NET Core 3+
+                .AddErrorInfoProvider(opt => opt.ExposeExceptionStackTrace = WebEnvironment.IsDevelopment())
+                // .AddWebSockets() // Add required services for web socket support
+                .AddDataLoader() // Add required services for DataLoader support
+                .AddGraphTypes(typeof(CustomSchema), serviceLifetime: ServiceLifetime.Scoped); // Add all IGraphType implementors in assembly which ChatSchema exists 
+
+
+            #endregion
+
+
+
             services.AddSingleton<MovieSingleton>();        //@deprecated
 
             //Scoped
@@ -119,7 +168,12 @@ namespace Movies
             });
             #endregion
 
-            services.AddAuthentication()
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddCookie()
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
                 {
                     options.RequireHttpsMetadata = false;
@@ -176,8 +230,12 @@ namespace Movies
             app.UseAuthentication();
 
             app.UseAuthorization();
-            
 
+            // use HTTP middleware for ChatSchema at default path /graphql
+            app.UseGraphQL<CustomSchema>();
+
+            // use GraphQL Playground middleware at default path /ui/playground with default options
+            app.UseGraphQLPlayground();
 
             app.UseEndpoints(endpoints =>
             {

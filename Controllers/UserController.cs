@@ -185,7 +185,7 @@ namespace Movies.Controllers
         /// <summary>
         /// Json Web Token
         /// </summary>
-        private string GenerateJWT(IdentityUser model)
+        private string GenerateJWT(ApplicationUser model)
         {
             var claims = new[]
             { 
