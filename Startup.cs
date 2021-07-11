@@ -6,9 +6,6 @@ using GraphQL.Types;
 using Movies.GraphQLArchives;
 using Movies.GraphQLArchives.Models;
 
-
-
-
 using Microsoft.AspNetCore.Authentication.Cookies; 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -81,7 +78,7 @@ namespace Movies
             //services.AddSingleton<MovieType>();
             //services.AddSingleton<CategoryType>();
 
-            //services.AddScoped<ISchema, CustomSchema>();
+            services.AddScoped<ISchema, CustomSchema>();
 
             // Add GraphQL services and configure options
             services
