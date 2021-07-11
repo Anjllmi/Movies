@@ -27,7 +27,8 @@ namespace Movies.Controllers
 
         // GET: api/Category
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize(Roles = "ADMIN")]
+        //[AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
         {
             //return await _context.Categories.ToListAsync();

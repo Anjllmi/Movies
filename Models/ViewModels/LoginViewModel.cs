@@ -17,3 +17,4 @@ namespace Movies.Models.ViewModels
         public string Password { get; set; }
     }
 }
+ 
